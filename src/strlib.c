@@ -2,19 +2,18 @@
 #include <string.h>
 
 //String.prototyp.at()
-char str_at(const char* str, int index)
-{
+void str_at(const char* str, int index, char* output) {
     int len = strlen(str);
     index = (index < 0) ? len + index : index;
-    return (index < 0 || index >= len) ? '\0' : str[index];
+    *output = (index < 0 || index >= len) ? '\0' : str[index];
 }
 
 //String.prototype.charAt()
-char str_charAt(const char* str, int index) 
+void str_charAt(const char* str, int index, char* output)
 {
     int len = strlen(str);
     index = (index < 0) ? len + index : index;
-    return (index < 0 || index >= len) ? '\0' : str[index];
+    *output = (index < 0 || index >= len) ? '\0' : str[index];
 }
 
 

@@ -4,7 +4,8 @@
 #include <stdbool.h>
 
 //String.prototyp.at()
-void str_at(const char* str, int index, char* output) {
+void str_at(const char* str, int index, char* output) 
+{
     int len = strlen(str);
     index = (index < 0) ? len + index : index;
     *output = (index < 0 || index >= len) ? '\0' : str[index];
@@ -17,7 +18,6 @@ void str_charAt(const char* str, int index, char* output)
     index = (index < 0) ? len + index : index;
     *output = (index < 0 || index >= len) ? '\0' : str[index];
 }
-
 
 //String.prototype.concat()
 void str_concat(const char* str1, const char* str2, char* output) 

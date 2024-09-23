@@ -11,8 +11,8 @@ int main() {
     const char* string_prototyp_at_text = "Hello World";
     char output_at; 
 
-    printf("Word: %s\n", string_prototyp_at_text);
-    
+    printf("str: %s\n", string_prototyp_at_text);
+
     str_at(string_prototyp_at_text, 7, &output_at);
     printf("Index 7  -> %c\n", output_at);
 
@@ -28,7 +28,7 @@ int main() {
     const char* string_prototyp_charAt_text = "Hello World";
     char output_charAt; 
 
-    printf("Word: %s\n", string_prototyp_charAt_text);
+    printf("str: %s\n", string_prototyp_charAt_text);
     
     str_charAt(string_prototyp_charAt_text, 7, &output_charAt);
     printf("Index 7  -> %c\n", output_charAt);
@@ -54,7 +54,7 @@ int main() {
 
     #pragma endregion
 
-    #pragma region String.prototyp.concat()
+    #pragma region String.prototyp.endsWith()
 
     printf("--------String.prototyp.endsWith()--------\n");
     bool output_endsWith; 
@@ -73,6 +73,27 @@ int main() {
     printf("%s\n", output_endsWith ? "true" : "false"); 
 
     #pragma endregion
+
+    #pragma region String.prototyp.includes()
+
+    printf("--------String.prototyp.includes()--------\n");
+
+    bool output_includes; 
+
+    const char* string_prototyp_includes_str = "Hello world";
+    const char* string_prototyp_includes_substring = "world";
+
+    printf("str -> : %s\n", string_prototyp_includes_str);
+    printf("substring -> : %s\n", string_prototyp_includes_substring);
+
+    str_includes(string_prototyp_includes_str, string_prototyp_includes_substring, &output_includes);
+
+    printf("result -> %s\n", output_includes ? "true" : "false"); 
+
+    
+    #pragma endregion
+
+
 
 
     return 0;

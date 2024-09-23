@@ -56,6 +56,10 @@ void str_endsWith(const char* word, const char* end_width, bool* output)
 }
 
 //String.prototype.includes()
+void str_includes(const char* word, const char* substring, bool* output) 
+{
+    *output = (strstr(word, substring) != NULL);
+}
 
 //String.prototype.indexOf()
 

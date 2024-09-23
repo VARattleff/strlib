@@ -62,6 +62,10 @@ void str_includes(const char* word, const char* substring, bool* output)
 }
 
 //String.prototype.indexOf()
+void str_indexOf(const char* word, const char* substring, const char** output) 
+{
+    *output = strstr(word, substring); 
+}
 
 //String.prototype.lastIndexOf()
 

@@ -93,8 +93,40 @@ int main() {
     
     #pragma endregion
 
+     #pragma region String.prototyp.indexOf()
 
+    printf("--------String.prototyp.indexOf()--------\n");
 
+    const char* string_prototyp_indexOf_str = "Hello world";
+    const char* string_prototyp_indexOf_substring = "world";
+    const char* result;
+
+    printf("str -> : %s\n", string_prototyp_indexOf_str);
+    printf("substring -> : %s\n", string_prototyp_indexOf_substring);
+
+    str_indexOf(string_prototyp_indexOf_str, string_prototyp_indexOf_substring, &result);
+    
+    if (result != NULL) 
+    {
+        printf("result -> found at index: %ld\n", result - string_prototyp_indexOf_str); 
+    } else 
+    {
+        printf("result -> not found\n");
+    }
+
+    const char* not_found_substring = "dunno";
+    printf("substring -> : %s\n", not_found_substring);
+    str_indexOf(string_prototyp_indexOf_str, not_found_substring, &result);
+    
+    if (result != NULL) 
+    {
+        printf("result -> found at index: %ld\n", result - string_prototyp_indexOf_str);
+    } else 
+    {
+        printf("result -> not found\n"); 
+    }
+
+    #pragma endregion
 
     return 0;
 }

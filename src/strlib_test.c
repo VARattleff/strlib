@@ -37,5 +37,21 @@ int main() {
 
     #pragma endregion
 
+    #pragma region String.prototyp.concat()
+
+    printf("--------String.prototyp.concat()--------\n");
+
+    const char* string_prototyp_concat_str1 = "Hello";
+    const char* string_prototyp_concat_str2 = "World";
+    char output_concat[100]; 
+
+    printf("str1 -> : %s\n", string_prototyp_concat_str1);
+    printf("str2 -> : %s\n", string_prototyp_concat_str2);
+
+    str_concat(string_prototyp_concat_str1, string_prototyp_concat_str2, output_concat);
+    printf("str1 + str2  -> %s\n", output_concat); 
+
+    #pragma endregion
+
     return 0;
 }

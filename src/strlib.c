@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 //String.prototyp.at()
 void str_at(const char* str, int index, char* output) {
@@ -18,6 +19,25 @@ void str_charAt(const char* str, int index, char* output)
 
 
 //String.prototype.concat()
+void str_concat(const char* str1, const char* str2, char* output) 
+{
+    int len_str1 = strlen(str1);
+    int len_str2 = strlen(str2);
+    char* result = (char*)malloc(len_str1 + len_str2 + 1); 
+
+    if (result == NULL) 
+    {
+        *output = '\0'; 
+        return;
+    }
+
+    strcpy(result, str1);
+    strcat(result, str2);
+
+    strcpy(output, result); 
+    free(result);
+}
+
 
 //String.prototype.endsWith()
 

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "strlib.h"
+#include <stdbool.h>
 
 int main() {
     
@@ -52,6 +53,27 @@ int main() {
     printf("str1 + str2  -> %s\n", output_concat); 
 
     #pragma endregion
+
+    #pragma region String.prototyp.concat()
+
+    printf("--------String.prototyp.endsWith()--------\n");
+    bool output_endsWith; 
+
+    const char* string_prototyp_endsWith_str = "Hello";
+    const char* string_prototyp_endsWith_word = "World";
+    printf("%s endsWith %s -> ", string_prototyp_endsWith_str, string_prototyp_endsWith_word);
+    str_endsWith(string_prototyp_endsWith_str, string_prototyp_endsWith_word, &output_endsWith);
+    printf("%s\n", output_endsWith ? "true" : "false"); 
+
+
+    const char* string_prototyp_endsWith_str2 = "Hello";
+    const char* string_prototyp_endsWith_word2 = "lo";
+    printf("%s endsWith %s -> ", string_prototyp_endsWith_str2, string_prototyp_endsWith_word2);
+    str_endsWith(string_prototyp_endsWith_str2, string_prototyp_endsWith_word2, &output_endsWith);
+    printf("%s\n", output_endsWith ? "true" : "false"); 
+
+    #pragma endregion
+
 
     return 0;
 }

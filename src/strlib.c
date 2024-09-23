@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 //String.prototyp.at()
 void str_at(const char* str, int index, char* output) {
@@ -38,8 +39,21 @@ void str_concat(const char* str1, const char* str2, char* output)
     free(result);
 }
 
-
 //String.prototype.endsWith()
+void str_endsWith(const char* word, const char* end_width, bool* output) 
+{
+    int word_len = strlen(word);
+    int end_width_len = strlen(end_width);
+
+    if (end_width_len > word_len) 
+    {
+        *output = false;
+        return;
+    }
+
+    const char* word_end = word + (word_len - end_width_len);
+    *output = (strcmp(word_end, end_width) == 0);
+}
 
 //String.prototype.includes()
 

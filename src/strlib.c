@@ -68,6 +68,19 @@ void str_indexOf(const char* word, const char* substring, const char** output)
 }
 
 //String.prototype.lastIndexOf()
+void str_lastIndexOf(const char* word, const char* substring, int* output) 
+{
+    const char* lastPos = NULL;
+    const char* currentPos = word;
+
+    while ((currentPos = strstr(currentPos, substring)) != NULL) 
+    {
+        lastPos = currentPos; 
+        currentPos++; 
+    }
+
+    *output = (lastPos != NULL) ? (int)(lastPos - word) : -1;
+}
 
 //String.prototype.localeCompare()
 

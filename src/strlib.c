@@ -1,8 +1,13 @@
-//strlib.c
-
-//todo:
+#include <stdio.h>
+#include <string.h>
 
 //String.prototyp.at()
+int str_at(const char* str, int index)
+{
+    int len = strlen(str);
+    index = (index < 0) ? len + index : index;
+    return (index < 0 || index >= len) ? '\0' : str[index];
+}
 
 //String.prototype.charAt()
 

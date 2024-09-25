@@ -83,7 +83,7 @@ int main()
 
     #pragma region  String.prototype.startsWith()
     print_separator("String.prototype.startsWith()");
-    bool_output = str_startsWith("Hello World", "Hello", 0);
+    str_startsWith("Hello World", "Hello", 0, &bool_output);
     printf("'Hello World' startsWith 'Hello': %s\n", bool_output ? "true" : "false");
     #pragma endregion
 

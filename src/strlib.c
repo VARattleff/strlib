@@ -126,19 +126,16 @@ void str_padEnd(const char* str, int targetLength, const char* padString, char* 
 {
     int strLen = str_length(str);
     int padLen = str_length(padString);
-    int i, j;
+    int i;
 
     for (i = 0; i < strLen; i++) 
     {
         output[i] = str[i];
     }
 
-    j = 0;
-    while (i < targetLength) 
+    for (int j = 0; i < targetLength; i++, j++) 
     {
         output[i] = padString[j % padLen];
-        i++;
-        j++;
     }
     output[i] = '\0';
 }
@@ -149,77 +146,69 @@ void str_padStart(const char* str, int targetLength, const char* padString, char
     int strLen = str_length(str);
     int padLen = str_length(padString);
     int paddings = targetLength - strLen;
-    int i, j;
+    int i = 0, j = 0;
 
-    j = 0;
-    for (i = 0; i < paddings; i++) 
+    while (i < paddings) 
     {
-        output[i] = padString[j % padLen];
-        j++;
+        output[i++] = padString[j++ % padLen];
     }
 
-    for (j = 0; j < strLen; j++) 
+    while (*str) 
     {
-        output[i + j] = str[j];
+        output[i++] = *str++;
     }
-    output[i + j] = '\0';
+    output[i] = '\0';
 }
 
 // String.prototype.repeat()
 void str_repeat(const char* str, int count, char* output) 
 {
     int strLen = str_length(str);
-    int i, j;
-
-    for (i = 0; i < count; i++) 
+    for (int i = 0; i < count; i++) 
     {
-        for (j = 0; j < strLen; j++) 
+        for (int j = 0; j < strLen; j++) 
         {
             output[i * strLen + j] = str[j];
         }
     }
-    output[i * strLen] = '\0';
+    output[count * strLen] = '\0';
 }
 
 // String.prototype.slice()
 void str_slice(const char* str, int start, int end, char* output) 
 {
     int strLen = str_length(str);
-    int i, j;
 
-    if (start < 0) start = strLen + start;
-    if (end < 0) end = strLen + end;
+    if (start < 0) start += strLen;
+    if (end < 0) end += strLen;
     if (end > strLen) end = strLen;
 
-    for (i = start, j = 0; i < end; i++, j++) 
+    for (int i = start, j = 0; i < end; i++, j++) 
     {
         output[j] = str[i];
     }
-    output[j] = '\0';
+    output[end - start] = '\0';
 }
 
 // String.prototype.startsWith()
-bool str_startsWith(const char* str, const char* searchString, int position) 
+void str_startsWith(const char* str, const char* searchString, int position, bool* output) 
 {
-    int strLen = str_length(str);
-    int searchLen = str_length(searchString);
-    int i;
-
     if (position < 0) position = 0;
-    if (position + searchLen > strLen) return false;
-
-    for (i = 0; i < searchLen; i++) 
+    while (*searchString) 
     {
-        if (str[position + i] != searchString[i]) return false;
+        if (str[position++] != *searchString++) 
+        {
+            *output = false;
+            return;
+        }
     }
-    return true;
+    *output = true;
 }
 
 // String.prototype.substring()
 void str_substring(const char* str, int start, int end, char* output) 
 {
     int strLen = str_length(str);
-    int i, j;
 
     if (start < 0) start = 0;
     if (end > strLen) end = strLen;
@@ -230,34 +219,35 @@ void str_substring(const char* str, int start, int end, char* output)
         end = temp;
     }
 
-    for (i = start, j = 0; i < end; i++, j++) 
+    for (int i = start; i < end; i++) 
     {
-        output[j] = str[i];
+        *output++ = str[i];
     }
-    output[j] = '\0';
+    *output = '\0';
 }
 
 // String.prototype.toLowerCase()
 void str_toLowerCase(const char* str, char* output) 
 {
-    int i;
-    for (i = 0; str[i] != '\0'; i++) 
+    for (int i = 0; str[i] != '\0'; i++) 
     {
         if (str[i] >= 'A') 
         {
             if (str[i] <= 'Z') 
             {
                 output[i] = str[i] + 32;
-            } else 
+            } 
+            else 
             {
                 output[i] = str[i];
             }
-        } else 
+        } 
+        else 
         {
             output[i] = str[i];
         }
     }
-    output[i] = '\0';
+    output[str_length(str)] = '\0';
 }
 
 // String.prototype.toUpperCase()

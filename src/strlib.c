@@ -63,46 +63,21 @@ void str_endsWith(const char* word, const char* end_with, bool* output)
     }
 }
 
-// String.prototype.includes()
-void str_includes(const char* word, const char* substring, bool* output) 
-{
-    int word_len = str_length(word);
-    int sub_len = str_length(substring);
-    int i, j;
-
-    for (i = 0; i <= word_len - sub_len; i++) 
-    {
-        for (j = 0; j < sub_len; j++) 
-        {
-            if (word[i + j] != substring[j]) 
-            {
-                break;
-            }
-        }
-        if (j == sub_len) 
-        {
-            *output = true;
-            return;
-        }
-    }
-    *output = false;
-}
-
 // String.prototype.indexOf()
 void str_indexOf(const char* word, const char* substring, int* output) 
 {
     int word_len = str_length(word);
     int sub_len = str_length(substring);
-    int i, j;
-
-    for (i = 0; i <= word_len - sub_len; i++) 
+    for (int i = 0; i <= word_len - sub_len; i++) 
     {
-        for (j = 0; j < sub_len; j++) 
+        int j = 0;
+        while (j < sub_len) 
         {
             if (word[i + j] != substring[j]) 
             {
                 break;
             }
+            j++;
         }
         if (j == sub_len) 
         {
@@ -111,6 +86,14 @@ void str_indexOf(const char* word, const char* substring, int* output)
         }
     }
     *output = -1;
+}
+
+// String.prototype.includes()
+void str_includes(const char* word, const char* substring, bool* output) 
+{
+    int index;
+    str_indexOf(word, substring, &index);
+    *output = (index != -1);
 }
 
 // String.prototype.lastIndexOf()

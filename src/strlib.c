@@ -3,72 +3,39 @@
 
 int str_length(const char* str) 
 {
-    int len = 0;
-    while (str[len] != '\0') 
-    {
-        len++;
-    }
-    return len;
+    const char* s = str;
+    while (*s) s++;
+    return s - str;
 }
 
 // String.prototype.at()
-void str_at(const char* str, int index, char* output) 
-{
+void str_at(const char* str, int index, char* output) {
     int len = str_length(str);
-    if (index < 0) 
-    {
-        index = len + index;
-    }
-    
-    if (index < 0) 
-    {
-        *output = '\0';
-    } else if (index >= len) 
-    {
-        *output = '\0';
-    } else 
-    {
-        *output = str[index];
-    }
+    index = (index < 0) ? len + index : index;
+    *output = (index < 0 || index >= len) ? '\0' : str[index];
 }
 
 // String.prototype.charAt()
 void str_charAt(const char* str, int index, char* output) 
 {
     int len = str_length(str);
-    if (index < 0) 
-    {
-        index = len + index;
-    }
-    
-    if (index < 0) 
-    {
-        *output = '\0';
-    } else if (index >= len) 
-    {
-        *output = '\0';
-    } else 
-    {
-        *output = str[index];
-    }
+    index = (index < 0) ? len + index : index;
+    *output = (index < 0 || index >= len) ? '\0' : str[index];
 }
 
 // String.prototype.concat()
 void str_concat(const char* str1, const char* str2, char* output) 
 {
-    int len_str1 = str_length(str1);
-    int len_str2 = str_length(str2);
-    int i, j;
-
-    for (i = 0; i < len_str1; i++) 
+    int i = 0;
+    while (*str1) 
     {
-        output[i] = str1[i];
+        output[i++] = *str1++;
     }
-    for (j = 0; j < len_str2; j++) 
+    while (*str2) 
     {
-        output[i + j] = str2[j];
+        output[i++] = *str2++;
     }
-    output[i + j] = '\0';
+    output[i] = '\0';
 }
 
 // String.prototype.endsWith()
@@ -76,23 +43,24 @@ void str_endsWith(const char* word, const char* end_with, bool* output)
 {
     int word_len = str_length(word);
     int end_with_len = str_length(end_with);
-    int i;
-
+    
     if (end_with_len > word_len) 
     {
         *output = false;
-        return;
-    }
-
-    for (i = 0; i < end_with_len; i++) 
+    } 
+    else 
     {
-        if (word[word_len - end_with_len + i] != end_with[i]) 
+        const char* word_ptr = word + word_len - end_with_len;
+        *output = true;
+        while (*end_with) 
         {
-            *output = false;
-            return;
+            if (*word_ptr++ != *end_with++) 
+            {
+                *output = false;
+                break;
+            }
         }
     }
-    *output = true;
 }
 
 // String.prototype.includes()

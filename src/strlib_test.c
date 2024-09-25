@@ -2,165 +2,107 @@
 #include "strlib.h"
 #include <stdbool.h>
 
-int main() {
+void print_separator(const char* function_name) 
+{
+    printf("\n-------- %s --------\n", function_name);
+}
+
+int main() 
+{
+    char output[100];
+    bool bool_output;
+    int int_output;
+
+    #pragma region String.prototype.at() og String.prototype.charAt()
+    print_separator("String.prototype.at() og String.prototype.charAt()");
+    const char* str = "Hello World";
+    printf("Original string: %s\n", str);
     
-    #pragma region String.prototyp.at()
+    str_at(str, 7, output);
+    printf("at(7): %c\n", output[0]);
+    str_at(str, -1, output);
+    printf("at(-1): %c\n", output[0]);
     
-    printf("--------String.prototyp.at()--------\n");
-
-    const char* string_prototyp_at_text = "Hello World";
-    char output_at; 
-
-    printf("str: %s\n", string_prototyp_at_text);
-
-    str_at(string_prototyp_at_text, 7, &output_at);
-    printf("Index 7  -> %c\n", output_at);
-
-    str_at(string_prototyp_at_text, -1, &output_at);
-    printf("Index -1 -> %c\n", output_at);
-
+    str_charAt(str, 0, output);
+    printf("charAt(0): %c\n", output[0]);
     #pragma endregion
 
-    #pragma region String.prototyp.charAt()
-    
-    printf("--------String.prototyp.charAt()--------\n");
-
-    const char* string_prototyp_charAt_text = "Hello World";
-    char output_charAt; 
-
-    printf("str: %s\n", string_prototyp_charAt_text);
-    
-    str_charAt(string_prototyp_charAt_text, 7, &output_charAt);
-    printf("Index 7  -> %c\n", output_charAt);
-
-    str_charAt(string_prototyp_charAt_text, -1, &output_charAt);
-    printf("Index -1 -> %c\n", output_charAt);
-
+    #pragma region  String.prototype.concat()
+    print_separator("String.prototype.concat()");
+    const char* str1 = "Hello";
+    const char* str2 = " World";
+    str_concat(str1, str2, output);
+    printf("concat('%s', '%s'): %s\n", str1, str2, output);
     #pragma endregion
 
-    #pragma region String.prototyp.concat()
-
-    printf("--------String.prototyp.concat()--------\n");
-
-    const char* string_prototyp_concat_str1 = "Hello";
-    const char* string_prototyp_concat_str2 = "World";
-    char output_concat[100]; 
-
-    printf("str1 -> : %s\n", string_prototyp_concat_str1);
-    printf("str2 -> : %s\n", string_prototyp_concat_str2);
-
-    str_concat(string_prototyp_concat_str1, string_prototyp_concat_str2, output_concat);
-    printf("str1 + str2  -> %s\n", output_concat); 
-
+    #pragma region String.prototype.endsWith()
+    print_separator("String.prototype.endsWith()");
+    str_endsWith("Hello World", "World", &bool_output);
+    printf("'Hello World' endsWith 'World': %s\n", bool_output ? "true" : "false");
+    str_endsWith("Hello World", "Hello", &bool_output);
+    printf("'Hello World' endsWith 'Hello': %s\n", bool_output ? "true" : "false");
     #pragma endregion
 
-    #pragma region String.prototyp.endsWith()
-
-    printf("--------String.prototyp.endsWith()--------\n");
-    bool output_endsWith; 
-
-    const char* string_prototyp_endsWith_str = "Hello";
-    const char* string_prototyp_endsWith_word = "World";
-    printf("%s endsWith %s -> ", string_prototyp_endsWith_str, string_prototyp_endsWith_word);
-    str_endsWith(string_prototyp_endsWith_str, string_prototyp_endsWith_word, &output_endsWith);
-    printf("%s\n", output_endsWith ? "true" : "false"); 
-
-
-    const char* string_prototyp_endsWith_str2 = "Hello";
-    const char* string_prototyp_endsWith_word2 = "lo";
-    printf("%s endsWith %s -> ", string_prototyp_endsWith_str2, string_prototyp_endsWith_word2);
-    str_endsWith(string_prototyp_endsWith_str2, string_prototyp_endsWith_word2, &output_endsWith);
-    printf("%s\n", output_endsWith ? "true" : "false"); 
-
+    #pragma region  String.prototype.includes()
+    print_separator("String.prototype.includes()");
+    str_includes("Hello World", "Wor", &bool_output);
+    printf("'Hello World' includes 'Wor': %s\n", bool_output ? "true" : "false");
+    str_includes("Hello World", "xyz", &bool_output);
+    printf("'Hello World' includes 'xyz': %s\n", bool_output ? "true" : "false");
     #pragma endregion
 
-    #pragma region String.prototyp.includes()
-
-    printf("--------String.prototyp.includes()--------\n");
-
-    bool output_includes; 
-
-    const char* string_prototyp_includes_str = "Hello world";
-    const char* string_prototyp_includes_substring = "world";
-
-    printf("str -> : %s\n", string_prototyp_includes_str);
-    printf("substring -> : %s\n", string_prototyp_includes_substring);
-
-    str_includes(string_prototyp_includes_str, string_prototyp_includes_substring, &output_includes);
-
-    printf("result -> %s\n", output_includes ? "true" : "false"); 
-
-    
+    #pragma region  String.prototype.indexOf() og String.prototype.lastIndexOf()
+    print_separator("String.prototype.indexOf() og String.prototype.lastIndexOf()");
+    str_indexOf("Hello World World", "World", &int_output);
+    printf("indexOf('World') in 'Hello World World': %d\n", int_output);
+    str_lastIndexOf("Hello World World", "World", &int_output);
+    printf("lastIndexOf('World') in 'Hello World World': %d\n", int_output);
     #pragma endregion
 
-    #pragma region String.prototyp.indexOf()
-
-    printf("--------String.prototyp.indexOf()--------\n");
-
-    const char* string_prototyp_indexOf_str = "Hello world";
-    const char* string_prototyp_indexOf_substring = "world";
-    const char* result;
-
-    printf("str -> : %s\n", string_prototyp_indexOf_str);
-    printf("substring -> : %s\n", string_prototyp_indexOf_substring);
-
-    str_indexOf(string_prototyp_indexOf_str, string_prototyp_indexOf_substring, &result);
-    
-    if (result != NULL) 
-    {
-        printf("result -> found at index: %ld\n", result - string_prototyp_indexOf_str); 
-    } else 
-    {
-        printf("result -> not found\n");
-    }
-
-    const char* not_found_substring = "dunno";
-    printf("substring -> : %s\n", not_found_substring);
-    str_indexOf(string_prototyp_indexOf_str, not_found_substring, &result);
-    
-    if (result != NULL) 
-    {
-        printf("result -> found at index: %ld\n", result - string_prototyp_indexOf_str);
-    } else 
-    {
-        printf("result -> not found\n"); 
-    }
-
+    #pragma region  String.prototype.padEnd() og String.prototype.padStart()
+    print_separator("String.prototype.padEnd() og String.prototype.padStart()");
+    str_padEnd("Hello", 10, "*", output);
+    printf("padEnd('Hello', 10, '*'): %s\n", output);
+    str_padStart("Hello", 10, "*", output);
+    printf("padStart('Hello', 10, '*'): %s\n", output);
     #pragma endregion
 
-    #pragma region String.prototyp.lastIndexOf()
+    #pragma region  String.prototype.repeat()
+    print_separator("String.prototype.repeat()");
+    str_repeat("Ha", 3, output);
+    printf("repeat('Ha', 3): %s\n", output);
+    #pragma endregion
 
-    printf("--------String.prototyp.lastIndexOf()--------\n");
+    #pragma region  String.prototype.slice() og String.prototype.substring()
+    print_separator("String.prototype.slice() og String.prototype.substring()");
+    str_slice("Hello World", 6, 11, output);
+    printf("slice('Hello World', 6, 11): %s\n", output);
+    str_substring("Hello World", 6, 11, output);
+    printf("substring('Hello World', 6, 11): %s\n", output);
+    #pragma endregion
 
-    const char* string_prototyp_lastIndexOf_str = "Hello world world";
-    const char* string_prototyp_lastIndexOf_substring = "world";
-    int index;
+    #pragma region  String.prototype.startsWith()
+    print_separator("String.prototype.startsWith()");
+    bool_output = str_startsWith("Hello World", "Hello", 0);
+    printf("'Hello World' startsWith 'Hello': %s\n", bool_output ? "true" : "false");
+    #pragma endregion
 
-    printf("str -> : %s\n", string_prototyp_lastIndexOf_str);
-    printf("substring -> : %s\n", string_prototyp_lastIndexOf_substring);
+    #pragma region  String.prototype.toLowerCase() og String.prototype.toUpperCase()
+    print_separator("String.prototype.toLowerCase() og String.prototype.toUpperCase()");
+    str_toLowerCase("Hello World", output);
+    printf("toLowerCase('Hello World'): %s\n", output);
+    str_toUpperCase("Hello World", output);
+    printf("toUpperCase('Hello World'): %s\n", output);
+    #pragma endregion
 
-    str_lastIndexOf(string_prototyp_lastIndexOf_str, string_prototyp_lastIndexOf_substring, &index);
-    
-    if (index != -1) 
-    {
-        printf("result -> last found at index: %d\n", index); 
-    } else 
-    {
-        printf("result -> not found\n");
-    }
-
-    const char* not_found_substring_lastIndexOf = "dunno";
-    printf("substring -> : %s\n", not_found_substring_lastIndexOf);
-    str_lastIndexOf(string_prototyp_lastIndexOf_str, not_found_substring_lastIndexOf, &index);
-    
-    if (index != -1) 
-    {
-        printf("result -> last found at index: %d\n", index);
-    } else 
-    {
-        printf("result -> not found\n"); 
-    }
-
+    #pragma region  String.prototype.trim(), trimEnd(), og trimStart()
+    print_separator("String.prototype.trim(), trimEnd(), og trimStart()");
+    str_trim("  Hello World  ", output);
+    printf("trim('  Hello World  '): '%s'\n", output);
+    str_trimEnd("Hello World  ", output);
+    printf("trimEnd('Hello World  '): '%s'\n", output);
+    str_trimStart("  Hello World", output);
+    printf("trimStart('  Hello World'): '%s'\n", output);
     #pragma endregion
 
     return 0;

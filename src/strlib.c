@@ -36,7 +36,36 @@ void str_at(const char* str, int index, char* output)
 {
     int len = str_length(str);
     index = (index < 0) ? len + index : index;
-    *output = (index < 0 || index >= len) ? '\0' : str[index];
+    if (index < 0 || index >= len)
+    {
+        *output = '\0';
+        return;
+    }
+
+    int current_index = 0;
+    while (*str) 
+    {
+        const char* start = str;
+        int char_len;
+
+        if ((*str & 0x80) == 0) char_len = 1;
+        else if ((*str & 0xE0) == 0xC0) char_len = 2;
+        else if ((*str & 0xF0) == 0xE0) char_len = 3;
+        else if ((*str & 0xF8) == 0xF0) char_len = 4;
+
+        if (current_index == index) 
+        {
+            for (int i = 0; i < char_len; i++) 
+            {
+                output[i] = start[i];
+            }
+            output[char_len] = '\0';
+            return;
+        }
+
+        str += char_len;
+        current_index++;
+    }
 }
 
 // String.prototype.charAt()
@@ -44,7 +73,36 @@ void str_charAt(const char* str, int index, char* output)
 {
     int len = str_length(str);
     index = (index < 0) ? len + index : index;
-    *output = (index < 0 || index >= len) ? '\0' : str[index];
+    if (index < 0 || index >= len)
+    {
+        *output = '\0';
+        return;
+    }
+
+    int current_index = 0;
+    while (*str) 
+    {
+        const char* start = str;
+        int char_len;
+
+        if ((*str & 0x80) == 0) char_len = 1;
+        else if ((*str & 0xE0) == 0xC0) char_len = 2;
+        else if ((*str & 0xF0) == 0xE0) char_len = 3;
+        else if ((*str & 0xF8) == 0xF0) char_len = 4;
+
+        if (current_index == index) 
+        {
+            for (int i = 0; i < char_len; i++) 
+            {
+                output[i] = start[i];
+            }
+            output[char_len] = '\0';
+            return;
+        }
+
+        str += char_len;
+        current_index++;
+    }
 }
 
 // String.prototype.concat()

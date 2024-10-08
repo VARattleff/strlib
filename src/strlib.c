@@ -3,13 +3,37 @@
 
 int str_length(const char* str) 
 {
-    const char* s = str;
-    while (*s) s++;
-    return s - str;
+    int length = 0;
+    while (*str) 
+    {
+        
+        if ((*str & 0x80) == 0) 
+        {
+            str += 1;
+        } 
+        
+        else if ((*str & 0xE0) == 0xC0) 
+        {
+            str += 2;
+        } 
+        
+        else if ((*str & 0xF0) == 0xE0) 
+        {
+            str += 3;
+        } 
+        
+        else if ((*str & 0xF8) == 0xF0) 
+        {
+            str += 4;
+        }
+        length++;
+    }
+    return length;
 }
 
 // String.prototype.at()
-void str_at(const char* str, int index, char* output) {
+void str_at(const char* str, int index, char* output) 
+{
     int len = str_length(str);
     index = (index < 0) ? len + index : index;
     *output = (index < 0 || index >= len) ? '\0' : str[index];
@@ -379,3 +403,4 @@ void str_trimStart(const char* str, char* output)
     }
     output[j] = '\0';
 }
+

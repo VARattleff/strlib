@@ -1,31 +1,67 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-int str_length(const char* str) 
+//helper functions
+static int utf8_char_length(const char *str) {
+    if ((*str & 0x80) == 0) 
+    {
+        return 1;
+    } else if ((*str & 0xE0) == 0xC0) 
+    {
+        return 2;
+    } else if ((*str & 0xF0) == 0xE0) 
+    {
+        return 3;
+    } else if ((*str & 0xF8) == 0xF0) 
+    {
+        return 4;
+    } else 
+    {
+        return -1;
+    }
+}
+
+static const char* utf8_next_char(const char* str) 
+{
+    int char_len = utf8_char_length(str);
+    if (char_len > 0) 
+    {
+        return str + char_len;
+    }
+    return str;  
+}
+
+static const char* utf8_char_at(const char* str, int index) 
+{
+    int current_index = 0;
+    while (*str) 
+    {
+        if (current_index == index) 
+        {
+            return str;
+        }
+        str = utf8_next_char(str);
+        current_index++;
+    }
+    return NULL;  
+}
+
+static void utf8_copy_char(const char* src, char* dest) 
+{
+    int char_len = utf8_char_length(src);
+    for (int i = 0; i < char_len; i++) 
+    {
+        dest[i] = src[i];
+    }
+    dest[char_len] = '\0';  
+}
+
+static int str_length(const char* str) 
 {
     int length = 0;
     while (*str) 
     {
-        
-        if ((*str & 0x80) == 0) 
-        {
-            str += 1;
-        } 
-        
-        else if ((*str & 0xE0) == 0xC0) 
-        {
-            str += 2;
-        } 
-        
-        else if ((*str & 0xF0) == 0xE0) 
-        {
-            str += 3;
-        } 
-        
-        else if ((*str & 0xF8) == 0xF0) 
-        {
-            str += 4;
-        }
+        str = utf8_next_char(str);
         length++;
     }
     return length;
@@ -35,89 +71,74 @@ int str_length(const char* str)
 void str_at(const char* str, int index, char* output) 
 {
     int len = str_length(str);
-    index = (index < 0) ? len + index : index;
-    if (index < 0 || index >= len)
+    if (index < 0) 
     {
-        *output = '\0';
-        return;
+        index = len + index;  
     }
-
-    int current_index = 0;
-    while (*str) 
+    const char* target_char = utf8_char_at(str, index);
+    if (target_char) 
     {
-        const char* start = str;
-        int char_len;
-
-        if ((*str & 0x80) == 0) char_len = 1;
-        else if ((*str & 0xE0) == 0xC0) char_len = 2;
-        else if ((*str & 0xF0) == 0xE0) char_len = 3;
-        else if ((*str & 0xF8) == 0xF0) char_len = 4;
-
-        if (current_index == index) 
-        {
-            for (int i = 0; i < char_len; i++) 
-            {
-                output[i] = start[i];
-            }
-            output[char_len] = '\0';
-            return;
-        }
-
-        str += char_len;
-        current_index++;
+        utf8_copy_char(target_char, output);
+    } else 
+    {
+        output[0] = '\0';
     }
 }
 
 // String.prototype.charAt()
 void str_charAt(const char* str, int index, char* output) 
 {
-    int len = str_length(str);
+    int len = str_length(str); 
     index = (index < 0) ? len + index : index;
+
     if (index < 0 || index >= len)
     {
         *output = '\0';
         return;
     }
 
+    const char* current_char = str;
     int current_index = 0;
-    while (*str) 
+    
+    while (*current_char)
     {
-        const char* start = str;
-        int char_len;
-
-        if ((*str & 0x80) == 0) char_len = 1;
-        else if ((*str & 0xE0) == 0xC0) char_len = 2;
-        else if ((*str & 0xF0) == 0xE0) char_len = 3;
-        else if ((*str & 0xF8) == 0xF0) char_len = 4;
-
-        if (current_index == index) 
+        if (current_index == index)
         {
-            for (int i = 0; i < char_len; i++) 
-            {
-                output[i] = start[i];
-            }
-            output[char_len] = '\0';
+            utf8_copy_char(current_char, output);
             return;
         }
-
-        str += char_len;
+        current_char = utf8_next_char(current_char);
         current_index++;
     }
+    *output = '\0';  
 }
 
 // String.prototype.concat()
 void str_concat(const char* str1, const char* str2, char* output) 
 {
-    int i = 0;
-    while (*str1) 
+    const char* current = str1;
+    
+    while (*current) 
     {
-        output[i++] = *str1++;
+        int char_len = utf8_char_length(current);
+        for (int i = 0; i < char_len; i++) 
+        {
+            *output++ = current[i];
+        }
+        current = utf8_next_char(current);
     }
-    while (*str2) 
+    
+    current = str2;
+    while (*current) 
     {
-        output[i++] = *str2++;
+        int char_len = utf8_char_length(current);
+        for (int i = 0; i < char_len; i++) 
+        {
+            *output++ = current[i];
+        }
+        current = utf8_next_char(current);
     }
-    output[i] = '\0';
+    *output = '\0';
 }
 
 // String.prototype.endsWith()
@@ -129,20 +150,23 @@ void str_endsWith(const char* word, const char* end_with, bool* output)
     if (end_with_len > word_len) 
     {
         *output = false;
-    } 
-    else 
-    {
-        const char* word_ptr = word + word_len - end_with_len;
-        *output = true;
-        while (*end_with) 
-        {
-            if (*word_ptr++ != *end_with++) 
-            {
-                *output = false;
-                break;
-            }
-        }
+        return;
     }
+
+    const char* word_ptr = utf8_char_at(word, word_len - end_with_len);
+    const char* end_ptr = end_with;
+    
+    while (*end_ptr) 
+    {
+        if (*word_ptr != *end_ptr) 
+        {
+            *output = false;
+            return;
+        }
+        word_ptr = utf8_next_char(word_ptr);
+        end_ptr = utf8_next_char(end_ptr);
+    }
+    *output = true;
 }
 
 // String.prototype.indexOf()
@@ -150,22 +174,31 @@ void str_indexOf(const char* word, const char* substring, int* output)
 {
     int word_len = str_length(word);
     int sub_len = str_length(substring);
+
+    const char* word_ptr = word;
     for (int i = 0; i <= word_len - sub_len; i++) 
     {
-        int j = 0;
-        while (j < sub_len) 
+        const char* word_iter = word_ptr;
+        const char* sub_iter = substring;
+        bool match = true;
+
+        while (*sub_iter && match) 
         {
-            if (word[i + j] != substring[j]) 
+            if (*word_iter != *sub_iter) 
             {
+                match = false;
                 break;
             }
-            j++;
+            word_iter = utf8_next_char(word_iter);
+            sub_iter = utf8_next_char(sub_iter);
         }
-        if (j == sub_len) 
+
+        if (match && *sub_iter == '\0') 
         {
             *output = i;
             return;
         }
+        word_ptr = utf8_next_char(word_ptr);
     }
     *output = -1;
 }
@@ -228,32 +261,49 @@ void str_padStart(const char* str, int targetLength, const char* padString, char
     int strLen = str_length(str);
     int padLen = str_length(padString);
     int paddings = targetLength - strLen;
-    int i = 0, j = 0;
 
-    while (i < paddings) 
+    const char* pad_ptr = padString;
+    
+    for (int i = 0; i < paddings; i++) 
     {
-        output[i++] = padString[j++ % padLen];
+        int pad_char_len = utf8_char_length(pad_ptr);
+        for (int j = 0; j < pad_char_len; j++) 
+        {
+            *output++ = pad_ptr[j];
+        }
+        pad_ptr = utf8_next_char(pad_ptr);
+
+        if (*pad_ptr == '\0') pad_ptr = padString;  
     }
 
     while (*str) 
     {
-        output[i++] = *str++;
+        int char_len = utf8_char_length(str);
+        for (int i = 0; i < char_len; i++) 
+        {
+            *output++ = str[i];
+        }
+        str = utf8_next_char(str);
     }
-    output[i] = '\0';
+    
+    *output = '\0';
 }
 
 // String.prototype.repeat()
 void str_repeat(const char* str, int count, char* output) 
 {
-    int strLen = str_length(str);
+    const char* current_char = str;
     for (int i = 0; i < count; i++) 
     {
-        for (int j = 0; j < strLen; j++) 
+        current_char = str;
+        while (*current_char) 
         {
-            output[i * strLen + j] = str[j];
+            utf8_copy_char(current_char, output);
+            output += utf8_char_length(current_char);
+            current_char = utf8_next_char(current_char);
         }
     }
-    output[count * strLen] = '\0';
+    *output = '\0';
 }
 
 // String.prototype.slice()
@@ -265,25 +315,73 @@ void str_slice(const char* str, int start, int end, char* output)
     if (end < 0) end += strLen;
     if (end > strLen) end = strLen;
 
-    for (int i = start, j = 0; i < end; i++, j++) 
+    const char* current_char = str;
+    const char* slice_start = NULL;
+    const char* slice_end = NULL;
+    int current_index = 0;
+    
+    while (*current_char)
     {
-        output[j] = str[i];
+        if (current_index == start) slice_start = current_char;
+        if (current_index == end) 
+        {
+            slice_end = current_char;
+            break;
+        }
+        current_char = utf8_next_char(current_char);
+        current_index++;
     }
-    output[end - start] = '\0';
+    if (!slice_end) slice_end = current_char;  
+    
+    while (slice_start < slice_end) 
+    {
+        int char_len = utf8_char_length(slice_start);
+        for (int i = 0; i < char_len; i++) 
+        {
+            *output++ = slice_start[i];
+        }
+        slice_start = utf8_next_char(slice_start);
+    }
+    *output = '\0';
 }
 
 // String.prototype.startsWith()
 void str_startsWith(const char* str, const char* searchString, int position, bool* output) 
 {
     if (position < 0) position = 0;
-    while (*searchString) 
+
+    const char* str_ptr = str;
+    const char* search_ptr = searchString;
+
+    for (int i = 0; i < position && *str_ptr; i++) 
     {
-        if (str[position++] != *searchString++) 
+        str_ptr = utf8_next_char(str_ptr);
+    }
+
+    while (*search_ptr) 
+    {
+        int str_len = utf8_char_length(str_ptr);
+        int search_len = utf8_char_length(search_ptr);
+
+        if (str_len != search_len) 
         {
             *output = false;
             return;
         }
+
+        for (int i = 0; i < str_len; i++) 
+        {
+            if (str_ptr[i] != search_ptr[i]) 
+            {
+                *output = false;
+                return;
+            }
+        }
+
+        str_ptr = utf8_next_char(str_ptr);
+        search_ptr = utf8_next_char(search_ptr);
     }
+
     *output = true;
 }
 
@@ -301,9 +399,18 @@ void str_substring(const char* str, int start, int end, char* output)
         end = temp;
     }
 
-    for (int i = start; i < end; i++) 
+    const char* current_char = str;
+    int current_index = 0;
+    
+    while (*current_char) 
     {
-        *output++ = str[i];
+        if (current_index >= start && current_index < end) 
+        {
+            utf8_copy_char(current_char, output);
+            output += utf8_char_length(current_char);
+        }
+        current_char = utf8_next_char(current_char);
+        current_index++;
     }
     *output = '\0';
 }

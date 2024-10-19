@@ -2,27 +2,38 @@
 #define STRLIB_H
 
 #include <stdbool.h>
+#include <stdlib.h>
 
-int str_length(const char* str);
+typedef struct {
+    char* data;           // Pointer to UTF-8 string
+    size_t byte_length;   // Length in bytes
+    size_t char_length;   // Length in codepoints
+    bool owns_data;       // Flag indicating if we should free data in destructor
+} String;
 
-// String prototyper
-void str_at(const char* str, int index, char* output);
-void str_charAt(const char* str, int index, char* output);
-void str_concat(const char* str1, const char* str2, char* output);
-void str_endsWith(const char* word, const char* end_with, bool* output);
-void str_includes(const char* word, const char* substring, bool* output);
-void str_indexOf(const char* word, const char* substring, int* output);
-void str_lastIndexOf(const char* word, const char* substring, int* output);
-void str_padEnd(const char* str, int targetLength, const char* padString, char* output);
-void str_padStart(const char* str, int targetLength, const char* padString, char* output);
-void str_repeat(const char* str, int count, char* output);
-void str_slice(const char* str, int start, int end, char* output);
-void str_startsWith(const char* str, const char* searchString, int position, bool* output);
-void str_substring(const char* str, int start, int end, char* output);
-void str_toLowerCase(const char* str, char* output);
-void str_toUpperCase(const char* str, char* output);
-void str_trim(const char* str, char* output);
-void str_trimEnd(const char* str, char* output);
-void str_trimStart(const char* str, char* output);
+// Constructor and destructor
+String str_construct(const char* str);
+void str_destruct(String str);
+char* str_valueOf(String str);
+
+// String prototypes
+String str_at(String str, int index);
+String str_charAt(String str, int index);
+String str_concat(String str1, String str2);
+bool str_endsWith(String str, String searchStr);
+bool str_includes(String str, String searchStr);
+int str_indexOf(String str, String searchStr);
+int str_lastIndexOf(String str, String searchStr);
+String str_padEnd(String str, size_t targetLength, String padStr);
+String str_padStart(String str, size_t targetLength, String padStr);
+String str_repeat(String str, size_t count);
+String str_slice(String str, int start, int end);
+bool str_startsWith(String str, String searchStr, size_t position);
+String str_substring(String str, int start, int end);
+String str_toLowerCase(String str);
+String str_toUpperCase(String str);
+String str_trim(String str);
+String str_trimEnd(String str);
+String str_trimStart(String str);
 
 #endif

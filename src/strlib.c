@@ -1,571 +1,520 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
+#include "strlib.h"
 
-//helper functions
-static int utf8_char_length(const char *str) {
-    if ((*str & 0x80) == 0) 
-    {
-        return 1;
-    } else if ((*str & 0xE0) == 0xC0) 
-    {
-        return 2;
-    } else if ((*str & 0xF0) == 0xE0) 
-    {
-        return 3;
-    } else if ((*str & 0xF8) == 0xF0) 
-    {
-        return 4;
-    } else 
-    {
-        return -1;
-    }
+// Helper functions
+static int utf8_char_length(const char *str) 
+{
+    if ((*str & 0x80) == 0) return 1;
+    else if ((*str & 0xE0) == 0xC0) return 2;
+    else if ((*str & 0xF0) == 0xE0) return 3;
+    else if ((*str & 0xF8) == 0xF0) return 4;
+    else return -1;
 }
 
 static const char* utf8_next_char(const char* str) 
 {
     int char_len = utf8_char_length(str);
-    if (char_len > 0) 
-    {
-        return str + char_len;
-    }
-    return str;  
+    if (char_len > 0) return str + char_len;
+    return str;
 }
 
-static const char* utf8_char_at(const char* str, int index) 
+String str_construct(const char* str) 
 {
-    int current_index = 0;
-    while (*str) 
+    String result;
+    if (str == NULL) 
     {
-        if (current_index == index) 
-        {
-            return str;
-        }
-        str = utf8_next_char(str);
-        current_index++;
+        result.data = NULL;
+        result.byte_length = 0;
+        result.char_length = 0;
+        result.owns_data = false;
+        return result;
     }
-    return NULL;  
+    
+    size_t byte_len = 0;
+    size_t char_len = 0;
+    const char* p = str;
+    while (*p) 
+    {
+        int char_size = utf8_char_length(p);
+        byte_len += char_size;
+        char_len++;
+        p += char_size;
+    }
+    
+    result.data = (char*)malloc(byte_len + 1);
+    for (size_t i = 0; i <= byte_len; i++) 
+    {
+        result.data[i] = str[i];
+    }
+    result.byte_length = byte_len;
+    result.char_length = char_len;
+    result.owns_data = true;
+    
+    return result;
 }
 
-static void utf8_copy_char(const char* src, char* dest) 
+void str_destruct(String str) 
 {
-    int char_len = utf8_char_length(src);
-    for (int i = 0; i < char_len; i++) 
+    if (str.owns_data && str.data != NULL) 
     {
-        dest[i] = src[i];
+        free(str.data);
     }
-    dest[char_len] = '\0';  
 }
 
-static int str_length(const char* str) 
+char* str_valueOf(String str) 
 {
-    int length = 0;
-    while (*str) 
+    char* result = (char*)malloc(str.byte_length + 1);
+    for (size_t i = 0; i <= str.byte_length; i++) 
     {
-        str = utf8_next_char(str);
-        length++;
+        result[i] = str.data[i];
     }
-    return length;
+    return result;
 }
 
 // String.prototype.at()
-void str_at(const char* str, int index, char* output) 
+String str_at(String str, int index) 
 {
-    int len = str_length(str);
     if (index < 0) 
     {
-        index = len + index;  
+        index = str.char_length + index;
     }
-    const char* target_char = utf8_char_at(str, index);
-    if (target_char) 
+    
+    if (index < 0 || index >= str.char_length) 
     {
-        utf8_copy_char(target_char, output);
-    } else 
-    {
-        output[0] = '\0';
+        return str_construct("");
     }
+    
+    const char* current = str.data;
+    for (int i = 0; i < index; i++) 
+    {
+        current = utf8_next_char(current);
+    }
+    
+    int char_len = utf8_char_length(current);
+    char temp[5] = {0}; 
+    for (int i = 0; i < char_len; i++) 
+    {
+        temp[i] = current[i];
+    }
+    
+    return str_construct(temp);
 }
 
 // String.prototype.charAt()
-void str_charAt(const char* str, int index, char* output) 
+String str_charAt(String str, int index) 
 {
-    int len = str_length(str); 
-    index = (index < 0) ? len + index : index;
-
-    if (index < 0 || index >= len)
-    {
-        *output = '\0';
-        return;
-    }
-
-    const char* current_char = str;
-    int current_index = 0;
-    
-    while (*current_char)
-    {
-        if (current_index == index)
-        {
-            utf8_copy_char(current_char, output);
-            return;
-        }
-        current_char = utf8_next_char(current_char);
-        current_index++;
-    }
-    *output = '\0';  
+    return str_at(str, index); 
 }
 
 // String.prototype.concat()
-void str_concat(const char* str1, const char* str2, char* output) 
+String str_concat(String str1, String str2) 
 {
-    const char* current = str1;
+    String result;
+    result.byte_length = str1.byte_length + str2.byte_length;
+    result.char_length = str1.char_length + str2.char_length;
+    result.data = (char*)malloc(result.byte_length + 1);
+    result.owns_data = true;
     
-    while (*current) 
+    for (size_t i = 0; i < str1.byte_length; i++) 
     {
-        int char_len = utf8_char_length(current);
-        for (int i = 0; i < char_len; i++) 
-        {
-            *output++ = current[i];
-        }
-        current = utf8_next_char(current);
+        result.data[i] = str1.data[i];
     }
     
-    current = str2;
-    while (*current) 
+    for (size_t i = 0; i < str2.byte_length; i++) 
     {
-        int char_len = utf8_char_length(current);
-        for (int i = 0; i < char_len; i++) 
-        {
-            *output++ = current[i];
-        }
-        current = utf8_next_char(current);
+        result.data[str1.byte_length + i] = str2.data[i];
     }
-    *output = '\0';
+    
+    result.data[result.byte_length] = '\0';
+    return result;
 }
 
 // String.prototype.endsWith()
-void str_endsWith(const char* word, const char* end_with, bool* output) 
+bool str_endsWith(String str, String searchStr) 
 {
-    int word_len = str_length(word);
-    int end_with_len = str_length(end_with);
-    
-    if (end_with_len > word_len) 
+    if (searchStr.char_length > str.char_length) 
     {
-        *output = false;
-        return;
+        return false;
     }
-
-    const char* word_ptr = utf8_char_at(word, word_len - end_with_len);
-    const char* end_ptr = end_with;
     
-    while (*end_ptr) 
-    {
-        if (*word_ptr != *end_ptr) 
-        {
-            *output = false;
-            return;
-        }
-        word_ptr = utf8_next_char(word_ptr);
-        end_ptr = utf8_next_char(end_ptr);
-    }
-    *output = true;
+    const char* str_end = str.data + str.byte_length - searchStr.byte_length;
+    return memcmp(str_end, searchStr.data, searchStr.byte_length) == 0;
 }
 
 // String.prototype.indexOf()
-void str_indexOf(const char* word, const char* substring, int* output) 
+int str_indexOf(String str, String searchStr) 
 {
-    int word_len = str_length(word);
-    int sub_len = str_length(substring);
-
-    const char* word_ptr = word;
-    for (int i = 0; i <= word_len - sub_len; i++) 
+    if (searchStr.char_length > str.char_length) 
     {
-        const char* word_iter = word_ptr;
-        const char* sub_iter = substring;
-        bool match = true;
-
-        while (*sub_iter && match) 
-        {
-            if (*word_iter != *sub_iter) 
-            {
-                match = false;
-                break;
-            }
-            word_iter = utf8_next_char(word_iter);
-            sub_iter = utf8_next_char(sub_iter);
-        }
-
-        if (match && *sub_iter == '\0') 
-        {
-            *output = i;
-            return;
-        }
-        word_ptr = utf8_next_char(word_ptr);
+        return -1;
     }
-    *output = -1;
+    
+    const char* haystack = str.data;
+    size_t char_pos = 0;
+    
+    while (*haystack) 
+    {
+        if (memcmp(haystack, searchStr.data, searchStr.byte_length) == 0) 
+        {
+            return char_pos;
+        }
+        haystack = utf8_next_char(haystack);
+        char_pos++;
+    }
+    
+    return -1;
 }
 
 // String.prototype.includes()
-void str_includes(const char* word, const char* substring, bool* output) 
+bool str_includes(String str, String searchStr) 
 {
-    int index;
-    str_indexOf(word, substring, &index);
-    *output = (index != -1);
+    return str_indexOf(str, searchStr) != -1;
 }
 
 // String.prototype.lastIndexOf()
-void str_lastIndexOf(const char* word, const char* substring, int* output) 
+int str_lastIndexOf(String str, String searchStr) 
 {
-    int word_len = str_length(word);
-    int sub_len = str_length(substring);
-    int i, j;
-    int last_index = -1;
-
-    for (i = 0; i <= word_len - sub_len; i++) 
+    if (searchStr.char_length > str.char_length) 
     {
-        for (j = 0; j < sub_len; j++) 
-        {
-            if (word[i + j] != substring[j]) 
-            {
-                break;
-            }
-        }
-        if (j == sub_len) 
-        {
-            last_index = i;
-        }
+        return -1;
     }
-    *output = last_index;
+    
+    int last_found = -1;
+    const char* haystack = str.data;
+    size_t char_pos = 0;
+    
+    while (*haystack) 
+    {
+        if (memcmp(haystack, searchStr.data, searchStr.byte_length) == 0) 
+        {
+            last_found = char_pos;
+        }
+        haystack = utf8_next_char(haystack);
+        char_pos++;
+    }
+    
+    return last_found;
 }
 
 // String.prototype.padEnd()
-void str_padEnd(const char* str, int targetLength, const char* padString, char* output) 
+String str_padEnd(String str, size_t targetLength, String padStr) 
 {
-    int strLen = str_length(str);
-    int padLen = str_length(padString);
-    int i;
-
-    for (i = 0; i < strLen; i++) 
+    if (str.char_length >= targetLength) 
     {
-        output[i] = str[i];
+        return str_construct(str.data);
     }
-
-    for (int j = 0; i < targetLength; i++, j++) 
+    
+    size_t pad_chars_needed = targetLength - str.char_length;
+    String result;
+    result.data = (char*)malloc(str.byte_length + (pad_chars_needed * padStr.byte_length / padStr.char_length) + 1);
+    result.owns_data = true;
+    
+    memcpy(result.data, str.data, str.byte_length);
+    
+    size_t current_pos = str.byte_length;
+    const char* pad_ptr = padStr.data;
+    for (size_t i = 0; i < pad_chars_needed; i++) 
     {
-        output[i] = padString[j % padLen];
+        int char_len = utf8_char_length(pad_ptr);
+        memcpy(result.data + current_pos, pad_ptr, char_len);
+        current_pos += char_len;
+        pad_ptr = utf8_next_char(pad_ptr);
+        if (*pad_ptr == '\0') pad_ptr = padStr.data;
     }
-    output[i] = '\0';
+    
+    result.data[current_pos] = '\0';
+    result.byte_length = current_pos;
+    result.char_length = targetLength;
+    
+    return result;
 }
 
 // String.prototype.padStart()
-void str_padStart(const char* str, int targetLength, const char* padString, char* output) 
+String str_padStart(String str, size_t targetLength, String padStr) 
 {
-    int strLen = str_length(str);
-    int padLen = str_length(padString);
-    int paddings = targetLength - strLen;
-
-    const char* pad_ptr = padString;
-    
-    for (int i = 0; i < paddings; i++) 
+    if (str.char_length >= targetLength) 
     {
-        int pad_char_len = utf8_char_length(pad_ptr);
-        for (int j = 0; j < pad_char_len; j++) 
-        {
-            *output++ = pad_ptr[j];
-        }
+        return str_construct(str.data);
+    }
+    
+    size_t pad_chars_needed = targetLength - str.char_length;
+    String result;
+    result.data = (char*)malloc(str.byte_length + (pad_chars_needed * padStr.byte_length / padStr.char_length) + 1);
+    result.owns_data = true;
+    
+    size_t current_pos = 0;
+    const char* pad_ptr = padStr.data;
+    for (size_t i = 0; i < pad_chars_needed; i++) 
+    {
+        int char_len = utf8_char_length(pad_ptr);
+        memcpy(result.data + current_pos, pad_ptr, char_len);
+        current_pos += char_len;
         pad_ptr = utf8_next_char(pad_ptr);
-
-        if (*pad_ptr == '\0') pad_ptr = padString;  
-    }
-
-    while (*str) 
-    {
-        int char_len = utf8_char_length(str);
-        for (int i = 0; i < char_len; i++) 
-        {
-            *output++ = str[i];
-        }
-        str = utf8_next_char(str);
+        if (*pad_ptr == '\0') pad_ptr = padStr.data;
     }
     
-    *output = '\0';
+    memcpy(result.data + current_pos, str.data, str.byte_length);
+    current_pos += str.byte_length;
+    
+    result.data[current_pos] = '\0';
+    result.byte_length = current_pos;
+    result.char_length = targetLength;
+    
+    return result;
 }
 
 // String.prototype.repeat()
-void str_repeat(const char* str, int count, char* output) 
+String str_repeat(String str, size_t count) 
 {
-    const char* current_char = str;
-    for (int i = 0; i < count; i++) 
+    if (count == 0) 
     {
-        current_char = str;
-        while (*current_char) 
-        {
-            utf8_copy_char(current_char, output);
-            output += utf8_char_length(current_char);
-            current_char = utf8_next_char(current_char);
-        }
+        return str_construct("");
     }
-    *output = '\0';
+    
+    String result;
+    result.byte_length = str.byte_length * count;
+    result.char_length = str.char_length * count;
+    result.data = (char*)malloc(result.byte_length + 1);
+    result.owns_data = true;
+    
+    size_t current_pos = 0;
+    for (size_t i = 0; i < count; i++) 
+    {
+        memcpy(result.data + current_pos, str.data, str.byte_length);
+        current_pos += str.byte_length;
+    }
+    
+    result.data[result.byte_length] = '\0';
+    return result;
 }
 
 // String.prototype.slice()
-void str_slice(const char* str, int start, int end, char* output) 
+String str_slice(String str, int start, int end) 
 {
-    int strLen = str_length(str);
-
-    if (start < 0) start += strLen;
-    if (end < 0) end += strLen;
-    if (end > strLen) end = strLen;
-
-    const char* current_char = str;
-    const char* slice_start = NULL;
-    const char* slice_end = NULL;
-    int current_index = 0;
+    if (start < 0) start += str.char_length;
+    if (end < 0) end += str.char_length;
+    if (end > str.char_length) end = str.char_length;
+    if (start > end) start = end;
     
-    while (*current_char)
-    {
-        if (current_index == start) slice_start = current_char;
-        if (current_index == end) 
-        {
-            slice_end = current_char;
-            break;
-        }
-        current_char = utf8_next_char(current_char);
-        current_index++;
-    }
-    if (!slice_end) slice_end = current_char;  
+    if (start < 0) start = 0;
+    if (end < 0) end = 0;
     
-    while (slice_start < slice_end) 
+    const char* start_ptr = str.data;
+    for (int i = 0; i < start && *start_ptr; i++) 
     {
-        int char_len = utf8_char_length(slice_start);
-        for (int i = 0; i < char_len; i++) 
-        {
-            *output++ = slice_start[i];
-        }
-        slice_start = utf8_next_char(slice_start);
+        start_ptr = utf8_next_char(start_ptr);
     }
-    *output = '\0';
+    
+    const char* end_ptr = start_ptr;
+    for (int i = start; i < end && *end_ptr; i++) 
+    {
+        end_ptr = utf8_next_char(end_ptr);
+    }
+    
+    size_t byte_len = end_ptr - start_ptr;
+    String result;
+    result.data = (char*)malloc(byte_len + 1);
+    result.owns_data = true;
+    memcpy(result.data, start_ptr, byte_len);
+    result.data[byte_len] = '\0';
+    result.byte_length = byte_len;
+    result.char_length = end - start;
+    
+    return result;
 }
 
 // String.prototype.startsWith()
-void str_startsWith(const char* str, const char* searchString, int position, bool* output) 
+bool str_startsWith(String str, String searchStr, size_t position) 
 {
-    if (position < 0) position = 0;
-
-    const char* str_ptr = str;
-    const char* search_ptr = searchString;
-
-    for (int i = 0; i < position && *str_ptr; i++) 
+    if (position >= str.char_length) 
     {
-        str_ptr = utf8_next_char(str_ptr);
+        return false;
     }
-
-    while (*search_ptr) 
+    
+    const char* start_ptr = str.data;
+    for (size_t i = 0; i < position; i++) 
     {
-        int str_len = utf8_char_length(str_ptr);
-        int search_len = utf8_char_length(search_ptr);
-
-        if (str_len != search_len) 
-        {
-            *output = false;
-            return;
-        }
-
-        for (int i = 0; i < str_len; i++) 
-        {
-            if (str_ptr[i] != search_ptr[i]) 
-            {
-                *output = false;
-                return;
-            }
-        }
-
-        str_ptr = utf8_next_char(str_ptr);
-        search_ptr = utf8_next_char(search_ptr);
+        start_ptr = utf8_next_char(start_ptr);
     }
-
-    *output = true;
+    
+    return memcmp(start_ptr, searchStr.data, searchStr.byte_length) == 0;
 }
 
 // String.prototype.substring()
-void str_substring(const char* str, int start, int end, char* output) 
+String str_substring(String str, int start, int end) 
 {
-    int strLen = str_length(str);
-
     if (start < 0) start = 0;
-    if (end > strLen) end = strLen;
+    if (end > str.char_length) end = str.char_length;
     if (start > end) 
     {
         int temp = start;
         start = end;
         end = temp;
     }
-
-    const char* current_char = str;
-    int current_index = 0;
     
-    while (*current_char) 
-    {
-        if (current_index >= start && current_index < end) 
-        {
-            utf8_copy_char(current_char, output);
-            output += utf8_char_length(current_char);
-        }
-        current_char = utf8_next_char(current_char);
-        current_index++;
-    }
-    *output = '\0';
+    return str_slice(str, start, end);
 }
 
 // String.prototype.toLowerCase()
-void str_toLowerCase(const char* str, char* output) 
+String str_toLowerCase(String str) 
 {
-    for (int i = 0; str[i] != '\0'; i++) 
+    String result;
+    result.data = (char*)malloc(str.byte_length + 1);
+    result.owns_data = true;
+    result.byte_length = str.byte_length;
+    result.char_length = str.char_length;
+    
+    for (size_t i = 0; i < str.byte_length; i++) 
     {
-        if (str[i] >= 'A') 
+        if (str.data[i] >= 'A' && str.data[i] <= 'Z') 
         {
-            if (str[i] <= 'Z') 
-            {
-                output[i] = str[i] + 32;
-            } 
-            else 
-            {
-                output[i] = str[i];
-            }
-        } 
-        else 
+            result.data[i] = str.data[i] + 32;
+        } else 
         {
-            output[i] = str[i];
+            result.data[i] = str.data[i];
         }
     }
-    output[str_length(str)] = '\0';
+    
+    result.data[str.byte_length] = '\0';
+    return result;
 }
 
 // String.prototype.toUpperCase()
-void str_toUpperCase(const char* str, char* output) 
+String str_toUpperCase(String str) 
 {
-    int i;
-    for (i = 0; str[i] != '\0'; i++) 
+    String result;
+    result.data = (char*)malloc(str.byte_length + 1);
+    result.owns_data = true;
+    result.byte_length = str.byte_length;
+    result.char_length = str.char_length;
+    
+    for (size_t i = 0; i < str.byte_length; i++) 
     {
-        if (str[i] >= 'a') 
+        if (str.data[i] >= 'a' && str.data[i] <= 'z') 
         {
-            if (str[i] <= 'z') 
-            {
-                output[i] = str[i] - 32;
-            } else 
-            {
-                output[i] = str[i];
-            }
+            result.data[i] = str.data[i] - 32;
         } else 
         {
-            output[i] = str[i];
+            result.data[i] = str.data[i];
         }
     }
-    output[i] = '\0';
+    
+    result.data[str.byte_length] = '\0';
+    return result;
 }
-
 // String.prototype.trim()
-void str_trim(const char* str, char* output) 
+String str_trim(String str) 
 {
-    int start = 0, end = str_length(str) - 1;
-    int i, j;
-
-    while (1) {
-        if (str[start] == ' ') 
-        {
-            start++;
-        } else if (str[start] == '\t') 
-        {
-            start++;
-        } else if (str[start] == '\n') 
-        {
-            start++;
-        } else 
-        {
-            break;
-        }
-    }
-
-    while (end > start) 
+    if (str.char_length == 0) 
     {
-        if (str[end] == ' ') 
-        {
-            end--;
-        } else if (str[end] == '\t') 
-        {
-            end--;
-        } else if (str[end] == '\n') 
-        {
-            end--;
-        } else 
-        {
-            break;
-        }
+        return str_construct("");
     }
 
-    for (i = start, j = 0; i <= end; i++, j++) 
+    const char* start = str.data;
+    const char* end = str.data + str.byte_length - 1;
+
+    while (*start && (*start == ' ' || *start == '\t' || *start == '\n')) 
     {
-        output[j] = str[i];
+        start = utf8_next_char(start);
     }
-    output[j] = '\0';
+
+    while (end > start && (*end == ' ' || *end == '\t' || *end == '\n' || *end == '\0')) 
+    {
+        end--;
+    }
+
+    size_t new_byte_length = end - start + 1;
+    
+    String result;
+    result.data = (char*)malloc(new_byte_length + 1);
+    result.owns_data = true;
+    
+    memcpy(result.data, start, new_byte_length);
+    result.data[new_byte_length] = '\0';
+    result.byte_length = new_byte_length;
+    
+    result.char_length = 0;
+    const char* p = result.data;
+    while (*p) 
+    {
+        p = utf8_next_char(p);
+        result.char_length++;
+    }
+    
+    return result;
 }
 
 // String.prototype.trimEnd()
-void str_trimEnd(const char* str, char* output) 
+String str_trimEnd(String str) 
 {
-    int end = str_length(str) - 1;
-    int i;
-
-    while (end >= 0) 
+    if (str.char_length == 0) 
     {
-        if (str[end] == ' ') 
-        {
-            end--;
-        } else if (str[end] == '\t') 
-        {
-            end--;
-        } else if (str[end] == '\n') 
-        {
-            end--;
-        } else 
-        {
-            break;
-        }
+        return str_construct("");
     }
 
+    const char* end = str.data + str.byte_length - 1;
 
-    for (i = 0; i <= end; i++) 
+    while (end > str.data && (*end == ' ' || *end == '\t' || *end == '\n' || *end == '\0')) 
     {
-        output[i] = str[i];
+        end--;
     }
-    output[i] = '\0';
+
+    size_t new_byte_length = end - str.data + 1;
+    
+    String result;
+    result.data = (char*)malloc(new_byte_length + 1);
+    result.owns_data = true;
+    
+    memcpy(result.data, str.data, new_byte_length);
+    result.data[new_byte_length] = '\0';
+    result.byte_length = new_byte_length;
+    
+    result.char_length = 0;
+    const char* p = result.data;
+    while (*p) 
+    {
+        p = utf8_next_char(p);
+        result.char_length++;
+    }
+    
+    return result;
 }
 
 // String.prototype.trimStart()
-void str_trimStart(const char* str, char* output) 
+String str_trimStart(String str) 
 {
-    int start = 0;
-    int i, j;
-
-    while (1) 
+    if (str.char_length == 0) 
     {
-        if (str[start] == ' ') 
-        {
-            start++;
-        } else if (str[start] == '\t') 
-        {
-            start++;
-        } else if (str[start] == '\n') 
-        {
-            start++;
-        } else 
-        {
-            break;
-        }
+        return str_construct("");
     }
 
-    for (i = start, j = 0; str[i] != '\0'; i++, j++) 
+    const char* start = str.data;
+
+    while (*start && (*start == ' ' || *start == '\t' || *start == '\n')) 
     {
-        output[j] = str[i];
+        start = utf8_next_char(start);
     }
-    output[j] = '\0';
+
+    size_t new_byte_length = (str.data + str.byte_length) - start;
+    
+    String result;
+    result.data = (char*)malloc(new_byte_length + 1);
+    result.owns_data = true;
+    
+    memcpy(result.data, start, new_byte_length);
+    result.data[new_byte_length] = '\0';
+    result.byte_length = new_byte_length;
+    
+    result.char_length = 0;
+    const char* p = result.data;
+    while (*p) 
+    {
+        p = utf8_next_char(p);
+        result.char_length++;
+    }
+    
+    return result;
 }
-
